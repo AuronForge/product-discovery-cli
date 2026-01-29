@@ -40,24 +40,36 @@ jobs:
         id: version
         run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
 
+      - name: Tag validation
+        id: tag_validation
+        run: |
+          if git ls-remote --tags origin "refs/tags/v${{ steps.version.outputs.VERSION }}" | grep -q "refs/tags/v${{ steps.version.outputs.VERSION }}"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup git
+        if: steps.tag_validation.outputs.exists == 'false'
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
 
       - name: Create and push tag
+        if: steps.tag_validation.outputs.exists == 'false'
         run: |
           git tag v${{ steps.version.outputs.VERSION }}
           git push origin v${{ steps.version.outputs.VERSION }}
 
       - name: Publish to npm
+        if: steps.tag_validation.outputs.exists == 'false'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
-        if: success()
+        if: success() && steps.tag_validation.outputs.exists == 'false'
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           body: Published v${{ steps.version.outputs.VERSION }} to npm
