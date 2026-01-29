@@ -22,21 +22,8 @@ jobs:
 
       - run: npm test
 
-      - name: Get version
+      - name: Get version from package.json
         id: version
-        run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
-
-      - name: Check if tag exists
-        id: check
-        continue-on-error: true
-        run: git rev-parse v${{ steps.version.outputs.VERSION }}
-
-      - name: Increment version
-        if: steps.check.outcome == 'success'
-        run: npm version patch --no-git-tag-version
-
-      - name: Get new version
-        id: newver
         run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
 
       - name: Setup git
@@ -44,24 +31,21 @@ jobs:
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
 
-      - name: Commit and tag
+      - name: Create and push tag
         run: |
-          git commit -am "chore: release v${{ steps.newver.outputs.VERSION }}" || true
-          git tag v${{ steps.newver.outputs.VERSION }}
+          git tag v${{ steps.version.outputs.VERSION }}
+          git push origin v${{ steps.version.outputs.VERSION }}
 
-      - name: Push
-        run: git push origin main --tags
-
-      - name: Publish npm
+      - name: Publish to npm
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         if: success()
         with:
-          tag_name: v${{ steps.newver.outputs.VERSION }}
-          body: Published v${{ steps.newver.outputs.VERSION }} to npm
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          body: Published v${{ steps.version.outputs.VERSION }} to npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
