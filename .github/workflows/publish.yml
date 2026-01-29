@@ -3,12 +3,15 @@ name: Publish to npm
 on:
   push:
     branches: [main]
+    tags:
+      - v*
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
 
     steps:
       - uses: actions/checkout@v4
