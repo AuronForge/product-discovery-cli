@@ -1,0 +1,51 @@
+name: Develop Workflow
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: npm test
+
+  create-pr-to-main:
+    needs: test
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from package.json
+        id: version
+        run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: release v${{ steps.version.outputs.VERSION }}"
+          title: "chore: release v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## Release v${{ steps.version.outputs.VERSION }}
+            
+            Automated PR from `develop` branch.
+            
+            - Tests passed ✅
+            - Ready to publish to npm
+            
+            All tests are passing. Merge to deploy.
+          branch: develop
+          base: main
+          delete-branch: false
