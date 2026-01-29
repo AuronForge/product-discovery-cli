@@ -2,8 +2,7 @@ name: Publish to npm
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   publish:
@@ -12,47 +11,44 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
+      - name: Install deps
+        run: npm ci
 
-      - run: npm test
+      - name: Test
+        run: npm test
 
-      - name: Get current version
-        id: version
-        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
-
-      - name: Check if version tag exists
-        id: check_tag
-        run: >-
-          if git rev-parse v${{ steps.version.outputs.VERSION }} >/dev/null 2>&1; then echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT; else echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT; fi
-
-      - name: Increment patch version
-        if: steps.check_tag.outputs.TAG_EXISTS == 'true'
-        run: npm version patch --no-git-tag-version
-
-      - name: Get new version
-        id: new_version
-        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+      - name: Determine version
+        id: versioning
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            npm version patch --no-git-tag-version
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Configure git
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      - name: Commit version bump
-        if: steps.check_tag.outputs.TAG_EXISTS == 'true'
-        run: git commit -am "chore: bump version to ${{ steps.new_version.outputs.VERSION }}"
+      - name: Commit version bump (if any)
+        run: git commit -am "chore: release v${{ steps.versioning.outputs.VERSION }}" || echo "no changes"
 
       - name: Create git tag
-        run: git tag v${{ steps.new_version.outputs.VERSION }}
+        run: git tag v${{ steps.versioning.outputs.VERSION }}
 
       - name: Push to github
         run: git push origin main --tags
@@ -65,8 +61,8 @@ jobs:
       - name: Create github release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.new_version.outputs.VERSION }}
-          name: v${{ steps.new_version.outputs.VERSION }}
-          body: Version v${{ steps.new_version.outputs.VERSION }} published to npm
+          tag_name: v${{ steps.versioning.outputs.VERSION }}
+          name: v${{ steps.versioning.outputs.VERSION }}
+          body: Version v${{ steps.versioning.outputs.VERSION }} published to npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
