@@ -37,6 +37,7 @@ class RunDiscoveryFlow {
           this.presenter.error(error.message);
           const retry = await this.prompt.askYesNo(this.i18n.t("askRetry"));
           if (!retry) {
+            this.presenter.goodbye();
             return;
           }
           continue;
