@@ -10,7 +10,7 @@ const { RunDiscoveryFlow } = require("./application/RunDiscoveryFlow");
 const DEFAULT_API_URL = process.env.API_URL || "http://localhost:3000/api/v1/discovery";
 
 const prompt = new PromptService();
-const presenter = new ConsolePresenter();
+const presenter = new ConsolePresenter(null);
 const apiClient = new ProductDiscoveryApi();
 const storage = new JsonFileStorage();
 const useCase = new RunDiscoveryFlow({ prompt, apiClient, storage, presenter });

@@ -82,3 +82,5 @@ class RunDiscoveryFlow {
     this.presenter.goodbye();
   }
 }
+
+module.exports = { RunDiscoveryFlow };

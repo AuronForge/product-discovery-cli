@@ -75,3 +75,5 @@ class ConsolePresenter {
     output.write("\n");
   }
 }
+
+module.exports = { ConsolePresenter };
