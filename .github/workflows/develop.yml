@@ -4,12 +4,13 @@ on:
   pull_request:
     branches: [develop]
     types: [opened, synchronize, reopened]
+  push:
+    branches: [develop]
 
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +29,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    if: success() && github.event_name == 'pull_request' && github.base_ref == 'develop'
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,7 +41,7 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_TOKEN }}
         run: |
           if gh pr view --base main --head develop > /dev/null 2>&1; then
             echo "PR from develop to main already exists."
