@@ -1,4 +1,4 @@
-name: Test and Publish
+name: Publish Package
 
 on:
   pull_request:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +42,7 @@ jobs:
           fi
 
   publish:
+    name: Publish to npm and Create GitHub Release
     needs: test
     runs-on: ubuntu-latest
     permissions:
