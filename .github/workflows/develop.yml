@@ -41,7 +41,7 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_TOKEN }}
         run: |
           if gh pr view --base main --head develop > /dev/null 2>&1; then
             echo "PR from develop to main already exists."
