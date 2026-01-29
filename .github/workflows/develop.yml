@@ -1,11 +1,13 @@
 name: Develop Workflow
 
 on:
-  push:
+  pull_request:
     branches: [develop]
+    types: [opened, synchronize, reopened]
 
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +21,12 @@ jobs:
       - run: npm test
 
   create-pr-to-main:
+    name: Create Pull Request to Main
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     if: success()
     steps:
       - uses: actions/checkout@v4
@@ -32,20 +38,21 @@ jobs:
         run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: release v${{ steps.version.outputs.VERSION }}"
-          title: "chore: release v${{ steps.version.outputs.VERSION }}"
-          body: |
-            ## Release v${{ steps.version.outputs.VERSION }}
-            
-            Automated PR from `develop` branch.
-            
-            - Tests passed ✅
-            - Ready to publish to npm
-            
-            All tests are passing. Merge to deploy.
-          branch: develop
-          base: main
-          delete-branch: false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh pr view --base main --head develop > /dev/null 2>&1; then
+            echo "PR from develop to main already exists."
+            exit 0
+          fi
+          gh pr create \
+            --base main \
+            --head develop \
+            --title "chore: release v${{ steps.version.outputs.VERSION }}" \
+            --body "## Release v${{ steps.version.outputs.VERSION }}
+
+          Automated PR from develop branch.
+
+          - Tests passed ✅
+
+          All tests are passing. Merge to deploy."
