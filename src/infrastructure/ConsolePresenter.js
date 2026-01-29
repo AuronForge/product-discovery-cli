@@ -57,6 +57,21 @@ class ConsolePresenter {
   spinner(text) {
     return ora(text).start();
   }
-}
 
-module.exports = { ConsolePresenter };
+  goodbye() {
+    if (!this.i18n) return;
+    output.write("\n");
+    output.write(
+      boxen(
+        `${chalk.bold.cyan(this.i18n.t("thankYou"))}\n${chalk.gray(this.i18n.t("closeConsole"))}`,
+        {
+          padding: 1,
+          margin: 1,
+          borderStyle: "round",
+          borderColor: "cyan"
+        }
+      )
+    );
+    output.write("\n");
+  }
+}

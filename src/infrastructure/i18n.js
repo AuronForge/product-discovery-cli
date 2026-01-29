@@ -36,7 +36,11 @@ const translations = {
     configError: "Erro no config:",
     
     // Validation
-    required: "Este campo é obrigatório"
+    required: "Este campo é obrigatório",
+    
+    // Goodbye
+    thankYou: "Obrigado por usar o Product Discovery CLI!",
+    closeConsole: "Você pode fechar esta janela ou pressionar Ctrl+C"
   },
   
   "en-us": {
@@ -76,7 +80,11 @@ const translations = {
     configError: "Config error:",
     
     // Validation
-    required: "This field is required"
+    required: "This field is required",
+    
+    // Goodbye
+    thankYou: "Thank you for using Product Discovery CLI!",
+    closeConsole: "You can close this window or press Ctrl+C"
   }
 };
 

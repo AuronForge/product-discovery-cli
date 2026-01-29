@@ -78,7 +78,7 @@ class RunDiscoveryFlow {
         continueOuter = false;
       }
     }
+
+    this.presenter.goodbye();
   }
 }
-
-module.exports = { RunDiscoveryFlow };
