@@ -1,5 +1,6 @@
 const { buildOptions } = require("../config/cliOptions");
 const { ConfigLoader } = require("../infrastructure/ConfigLoader");
+const { getTranslator } = require("../infrastructure/i18n");
 
 class CliController {
   constructor({ defaultApiUrl, prompt, presenter, apiClient, storage, useCase }) {
@@ -13,11 +14,17 @@ class CliController {
 
   async start() {
     const cliOptions = buildOptions(this.defaultApiUrl);
+    const lang = cliOptions.lang || "pt-br";
+    const i18n = getTranslator(lang);
+    
+    // Update presenter with i18n
+    this.presenter.i18n = i18n;
+    
     let config = {};
     try {
       config = new ConfigLoader().load(cliOptions.config);
     } catch (error) {
-      this.presenter.error(`Config error: ${error.message}`);
+      this.presenter.error(`${i18n.t("configError")} ${error.message}`);
       return;
     }
 
@@ -31,7 +38,7 @@ class CliController {
       prompt: this.prompt
     };
 
-    await this.useCase.execute({ apiUrl, saveDefaults });
+    await this.useCase.execute({ apiUrl, lang, saveDefaults, i18n });
   }
 }
 

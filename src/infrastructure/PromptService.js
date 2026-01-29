@@ -13,14 +13,14 @@ class PromptService {
     return answer;
   }
 
-  async askInput(message, { required = false } = {}) {
+  async askInput(message, { required = false, requiredMessage = "This field is required." } = {}) {
     const { answer } = await inquirer.prompt([
       {
         type: "input",
         name: "answer",
         message,
         validate: required
-          ? (value) => (value && value.trim() ? true : "This field is required.")
+          ? (value) => (value && value.trim() ? true : requiredMessage)
           : () => true
       }
     ]);

@@ -8,7 +8,8 @@ class RunDiscoveryFlow {
     this.presenter = presenter;
   }
 
-  async execute({ apiUrl, saveDefaults }) {
+  async execute({ apiUrl, lang, saveDefaults, i18n }) {
+    this.i18n = i18n;
     this.presenter.printHeader();
 
     let continueOuter = true;
@@ -18,22 +19,23 @@ class RunDiscoveryFlow {
       let shouldImprove = true;
 
       while (shouldImprove) {
-        this.presenter.info("What do you want to run discovery for?");
-        const idea = await this.prompt.askInput("Describe your idea/problem/application/pain:", {
-          required: true
+        this.presenter.info(this.i18n.t("askIdea"));
+        const idea = await this.prompt.askInput(this.i18n.t("describeIdea"), {
+          required: true,
+          requiredMessage: this.i18n.t("required")
         });
 
         const attemptText = session.addIdea(idea);
 
-        const spinner = this.presenter.spinner("Calling the discovery API...");
+        const spinner = this.presenter.spinner(this.i18n.t("callingApi"));
         let result;
         try {
-          result = await this.apiClient.runDiscovery(attemptText, apiUrl);
-          spinner.succeed("Discovery completed.");
+          result = await this.apiClient.runDiscovery(attemptText, apiUrl, lang);
+          spinner.succeed(this.i18n.t("discoveryCompleted"));
         } catch (error) {
-          spinner.fail("Discovery failed.");
+          spinner.fail(this.i18n.t("discoveryFailed"));
           this.presenter.error(error.message);
-          const retry = await this.prompt.askYesNo("Do you want to try again?");
+          const retry = await this.prompt.askYesNo(this.i18n.t("askRetry"));
           if (!retry) {
             return;
           }
@@ -43,7 +45,7 @@ class RunDiscoveryFlow {
         this.presenter.json(result);
 
         if (saveDefaults.autoSave === false) {
-          const improve = await this.prompt.askYesNo("Do you want to improve the result?");
+          const improve = await this.prompt.askYesNo(this.i18n.t("askImprove"));
           if (!improve) {
             shouldImprove = false;
             continueOuter = false;
@@ -54,12 +56,12 @@ class RunDiscoveryFlow {
 
         const saveInfo = await this.storage.saveJson(result, saveDefaults);
         if (saveInfo.saved) {
-          this.presenter.success(`Saved to: ${saveInfo.fullPath}`);
+          this.presenter.success(`${this.i18n.t("savedTo")} ${saveInfo.fullPath}`);
           shouldImprove = false;
           continue;
         }
 
-        const improve = await this.prompt.askYesNo("Do you want to improve the result?");
+        const improve = await this.prompt.askYesNo(this.i18n.t("askImprove"));
         if (!improve) {
           shouldImprove = false;
           continueOuter = false;
@@ -71,7 +73,7 @@ class RunDiscoveryFlow {
         break;
       }
 
-      const another = await this.prompt.askYesNo("Do you want to run discovery for another idea?");
+      const another = await this.prompt.askYesNo(this.i18n.t("askAnother"));
       if (!another) {
         continueOuter = false;
       }

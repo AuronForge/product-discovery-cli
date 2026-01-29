@@ -2,7 +2,6 @@
   "name": "product-discovery-cli",
   "version": "0.0.1",
   "description": "CLI to consume the Product Discovery Agent API",
-  "private": true,
   "license": "Apache-2.0",
   "author": "AuronForge",
   "keywords": [
@@ -13,6 +12,13 @@
   ],
   "bin": {
     "product-discovery": "src/index.js"
+  },
+  "files": [
+    "src",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "start": "node src/index.js",

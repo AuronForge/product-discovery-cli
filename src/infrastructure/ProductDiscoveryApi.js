@@ -1,9 +1,9 @@
 class ProductDiscoveryApi {
-  async runDiscovery(problemText, apiUrl) {
+  async runDiscovery(problemText, apiUrl, lang = "pt-br") {
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problem: problemText })
+      body: JSON.stringify({ problem: problemText, lang })
     });
 
     const text = await response.text();
