@@ -60,8 +60,7 @@ jobs:
 
       - name: Push to github
         run: |
-          git push origin main
-          git push origin v${{ steps.new_version.outputs.VERSION }}
+          git push origin main --tags
 
       - name: Publish to npm
         run: npm publish
