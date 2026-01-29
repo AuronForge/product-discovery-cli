@@ -11,58 +11,57 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           registry-url: https://registry.npmjs.org
 
-      - name: Install deps
-        run: npm ci
+      - run: npm ci
 
-      - name: Test
-        run: npm test
+      - run: npm test
 
-      - name: Determine version
-        id: versioning
-        shell: bash
+      - name: Get version
+        id: version
+        run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check
+        continue-on-error: true
+        run: git rev-parse v${{ steps.version.outputs.VERSION }}
+
+      - name: Increment version
+        if: steps.check.outcome == 'success'
+        run: npm version patch --no-git-tag-version
+
+      - name: Get new version
+        id: newver
+        run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
+
+      - name: Setup git
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            npm version patch --no-git-tag-version
-            VERSION=$(node -p "require('./package.json').version")
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
 
-      - name: Configure git
+      - name: Commit and tag
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git commit -am "chore: release v${{ steps.newver.outputs.VERSION }}" || true
+          git tag v${{ steps.newver.outputs.VERSION }}
 
-      - name: Commit version bump (if any)
-        run: git commit -am "chore: release v${{ steps.versioning.outputs.VERSION }}" || echo "no changes"
-
-      - name: Create git tag
-        run: git tag v${{ steps.versioning.outputs.VERSION }}
-
-      - name: Push to github
+      - name: Push
         run: git push origin main --tags
 
-      - name: Publish to npm
+      - name: Publish npm
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create github release
+      - name: Release
         uses: softprops/action-gh-release@v1
+        if: success()
         with:
-          tag_name: v${{ steps.versioning.outputs.VERSION }}
-          name: v${{ steps.versioning.outputs.VERSION }}
-          body: Version v${{ steps.versioning.outputs.VERSION }} published to npm
+          tag_name: v${{ steps.newver.outputs.VERSION }}
+          body: Published v${{ steps.newver.outputs.VERSION }} to npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
