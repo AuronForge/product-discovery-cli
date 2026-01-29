@@ -31,12 +31,8 @@ jobs:
 
       - name: Check if version tag exists
         id: check_tag
-        run: |
-          if git rev-parse v${{ steps.version.outputs.VERSION }} >/dev/null 2>&1; then
-            echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
-          else
-            echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
-          fi
+        run: >-
+          if git rev-parse v${{ steps.version.outputs.VERSION }} >/dev/null 2>&1; then echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT; else echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT; fi
 
       - name: Increment patch version
         if: steps.check_tag.outputs.TAG_EXISTS == 'true'
@@ -59,8 +55,7 @@ jobs:
         run: git tag v${{ steps.new_version.outputs.VERSION }}
 
       - name: Push to github
-        run: |
-          git push origin main --tags
+        run: git push origin main --tags
 
       - name: Publish to npm
         run: npm publish
