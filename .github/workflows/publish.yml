@@ -8,27 +8,22 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    
     permissions:
       contents: write
-    
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Run tests
-        run: npm test
+      - run: npm test
 
       - name: Get current version
         id: version
@@ -39,7 +34,6 @@ jobs:
         run: |
           if git rev-parse v${{ steps.version.outputs.VERSION }} >/dev/null 2>&1; then
             echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
-            echo "Version v${{ steps.version.outputs.VERSION }} already exists, incrementing patch version..."
           else
             echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
           fi
@@ -52,7 +46,7 @@ jobs:
         id: new_version
         run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Configure Git
+      - name: Configure git
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -61,10 +55,10 @@ jobs:
         if: steps.check_tag.outputs.TAG_EXISTS == 'true'
         run: git commit -am "chore: bump version to ${{ steps.new_version.outputs.VERSION }}"
 
-      - name: Create Git tag
+      - name: Create git tag
         run: git tag v${{ steps.new_version.outputs.VERSION }}
 
-      - name: Push changes and tags
+      - name: Push to github
         run: |
           git push origin main
           git push origin v${{ steps.new_version.outputs.VERSION }}
@@ -74,21 +68,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create Release
+      - name: Create github release
         uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.new_version.outputs.VERSION }}
-          name: Release v${{ steps.new_version.outputs.VERSION }}
-          body: |
-            New version of product-discovery-cli is now available!
-            
-            Version: v${{ steps.new_version.outputs.VERSION }}
-            
-            Install it with:
-            ```bash
-            npm install -g product-discovery-cli
-            ```
-          draft: false
-          prerelease: false
+          name: v${{ steps.new_version.outputs.VERSION }}
+          body: Version v${{ steps.new_version.outputs.VERSION }} published to npm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
