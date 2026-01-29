@@ -8,6 +8,26 @@ on:
     branches: [develop]
 
 jobs:
+  tag_validation:
+    name: Tag validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: version
+        run: echo VERSION=$(cat package.json | grep '"version"' | head -1 | awk '{print $2}' | sed 's/"//g' | sed 's/,//g') >> $GITHUB_OUTPUT
+
+      - name: Check tag exists
+        run: |
+          if git ls-remote --tags origin "refs/tags/v${{ steps.version.outputs.VERSION }}" | grep -q "refs/tags/v${{ steps.version.outputs.VERSION }}"; then
+            echo "Tag v${{ steps.version.outputs.VERSION }} already exists. Please bump version."
+            exit 1
+          else
+            echo "Tag v${{ steps.version.outputs.VERSION }} does not exist."
+          fi
+
   test:
     name: Run Tests
     runs-on: ubuntu-latest
