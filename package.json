@@ -1,6 +1,6 @@
 {
   "name": "product-discovery-cli",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "CLI to consume the Product Discovery Agent API",
   "license": "Apache-2.0",
   "author": "AuronForge",
