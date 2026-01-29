@@ -1,0 +1,36 @@
+{
+  "name": "product-discovery-cli",
+  "version": "0.0.1",
+  "description": "CLI to consume the Product Discovery Agent API",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "AuronForge",
+  "keywords": [
+    "product-discovery",
+    "ai-agent",
+    "copilot",
+    "cli"
+  ],
+  "bin": {
+    "product-discovery": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "postinstall": "npm cache verify"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
