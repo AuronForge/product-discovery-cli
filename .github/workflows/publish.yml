@@ -27,7 +27,7 @@ jobs:
 
       - name: Get current version
         id: version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
 
       - name: Check if version tag exists
         id: check_tag
@@ -44,7 +44,7 @@ jobs:
 
       - name: Get new version
         id: new_version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
 
       - name: Configure git
         run: |
