@@ -2,13 +2,19 @@ const { Command } = require("commander");
 const { getTranslator } = require("../infrastructure/i18n");
 
 function buildOptions(defaultApiUrl) {
-  const program = new Command();
-  program.parse(process.argv);
-  const preOpts = program.opts();
+  // First pass: get lang to determine i18n
+  const preProgram = new Command();
+  preProgram
+    .allowUnknownOption()
+    .option("-l, --lang <language>", "Language code (pt-br, en-us)", "pt-br");
+  
+  preProgram.parse(process.argv);
+  const preOpts = preProgram.opts();
   const i18n = getTranslator(preOpts.lang || "pt-br");
   
-  const programWithDesc = new Command();
-  programWithDesc
+  // Second pass: full options with translations
+  const program = new Command();
+  program
     .name("product-discovery")
     .description(i18n.t("cliDescription"))
     .option("-u, --api-url <url>", i18n.t("optApiUrl"), defaultApiUrl)
@@ -19,8 +25,8 @@ function buildOptions(defaultApiUrl) {
     .option("-f, --file <name>", i18n.t("optFile"))
     .option("--no-save", i18n.t("optNoSave"));
 
-  programWithDesc.parse(process.argv);
-  return programWithDesc.opts();
+  program.parse(process.argv);
+  return program.opts();
 }
 
 module.exports = { buildOptions };
