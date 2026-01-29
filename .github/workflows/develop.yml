@@ -4,12 +4,13 @@ on:
   pull_request:
     branches: [develop]
     types: [opened, synchronize, reopened]
+  push:
+    branches: [develop]
 
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'develop' && github.head_ref != 'main'
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +29,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    if: success() && github.event_name == 'pull_request' && github.base_ref == 'develop' && github.head_ref != 'main'
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
         with:
