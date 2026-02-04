@@ -19,6 +19,7 @@ const translations = {
     
     // ConsolePresenter
     generatedDiscovery: "Discovery JSON gerado:",
+    runningOnPort: "Rodando na porta",
     error: "Erro:",
     
     // RunDiscoveryFlow
@@ -63,6 +64,7 @@ const translations = {
     
     // ConsolePresenter
     generatedDiscovery: "Generated discovery JSON:",
+    runningOnPort: "Running on port",
     error: "Error:",
     
     // RunDiscoveryFlow

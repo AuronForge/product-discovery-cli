@@ -10,7 +10,7 @@ class RunDiscoveryFlow {
 
   async execute({ apiUrl, lang, saveDefaults, i18n }) {
     this.i18n = i18n;
-    this.presenter.printHeader();
+    this.presenter.printHeader(apiUrl);
 
     let continueOuter = true;
 
