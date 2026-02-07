@@ -1,4 +1,4 @@
-const { DiscoverySession } = require("../src/domain/DiscoverySession");
+const { DiscoverySession } = require("./DiscoverySession");
 
 describe("DiscoverySession", () => {
   test("appends additional details after base idea", () => {

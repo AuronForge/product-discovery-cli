@@ -1,4 +1,4 @@
-const { RunDiscoveryFlow } = require("../src/application/RunDiscoveryFlow");
+const { RunDiscoveryFlow } = require("./RunDiscoveryFlow");
 
 const mockI18n = {
   t: jest.fn((key) => key)
