@@ -2,7 +2,7 @@ const {
   sanitizeForFolderName,
   timestampForPath,
   ensureJsonExtension
-} = require("../src/domain/PathNaming");
+} = require("./PathNaming");
 
 describe("PathNaming", () => {
   test("sanitizeForFolderName normalizes input", () => {
